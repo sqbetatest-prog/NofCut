@@ -1,0 +1,6 @@
+{
+  "name": "Minimal Video Editor",
+  "description": "A feature-rich, beautiful, and minimalist mobile video editing application with interactive multi-track timeline, visual effects, and project management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
