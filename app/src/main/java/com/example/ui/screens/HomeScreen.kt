@@ -200,6 +200,16 @@ fun HomeScreen(
                         viewModel.createProjectFromTemplate("Cozy Комната", "cozy")
                     }
                 }
+                item {
+                    TemplateCard(
+                        title = "Глубокий Космос",
+                        subtitle = "Звезды & Амбиент",
+                        themeColor = Color(0xFF7F00FF),
+                        icon = Icons.Rounded.AutoAwesome
+                    ) {
+                        viewModel.createProjectFromTemplate("Звездный Путь", "cosmic")
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(28.dp))

@@ -66,6 +66,9 @@ fun EditorScreen(
     var textToAdd by remember { mutableStateOf("") }
     var textStartSec by remember { mutableStateOf("0") }
     var textDurationSec by remember { mutableStateOf("4") }
+    var textColorHex by remember { mutableStateOf("#FFFFFF") }
+    var textFontSize by remember { mutableStateOf(18) }
+    var textAlignment by remember { mutableStateOf("Center") }
 
     // Derive active editing clip index and offset
     val activeClipData = remember(currentTimeMs, clips) {
@@ -1181,7 +1184,11 @@ fun EditorScreen(
                 containerColor = DarkSurfaceElevated,
                 title = { Text("Добавить наложение текста", fontWeight = FontWeight.Bold, color = TextActive) },
                 text = {
-                    Column(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                    ) {
                         OutlinedTextField(
                             value = textToAdd,
                             onValueChange = { textToAdd = it },
@@ -1229,6 +1236,122 @@ fun EditorScreen(
                                 modifier = Modifier.weight(1f)
                             )
                         }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Цвет текста", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextSubtle)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf(
+                                "#FFFFFF" to Color.White,
+                                "#FFE600" to Color(0xFFFFE600),
+                                "#00FFF0" to Color(0xFF00FFF0),
+                                "#FF2D55" to Color(0xFFFF2D55),
+                                "#00FF66" to Color(0xFF00FF66)
+                            ).forEach { (hex, clr) ->
+                                val isSelected = textColorHex == hex
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                        .background(clr)
+                                        .border(
+                                            width = if (isSelected) 2.dp else 1.dp,
+                                            color = if (isSelected) PrimaryNeon else Color.Transparent,
+                                            shape = CircleShape
+                                        )
+                                        .clickable { textColorHex = hex },
+                                    contentAlignment = Alignment.Center
+                               ) {
+                                   if (isSelected) {
+                                       Box(
+                                           modifier = Modifier
+                                               .size(12.dp)
+                                               .clip(CircleShape)
+                                               .background(if (clr == Color.White) Color.Black else Color.White)
+                                       )
+                                   }
+                               }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Положение текста", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextSubtle)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf(
+                                "Top" to "Вверху",
+                                "Center" to "Центр",
+                                "Bottom" to "Внизу"
+                            ).forEach { (alignVal, label) ->
+                                val isSelected = textAlignment == alignVal
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .border(
+                                            width = 1.dp,
+                                            color = if (isSelected) PrimaryNeon else CustomBorder,
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .background(if (isSelected) PrimaryNeon.copy(alpha = 0.1f) else Color.Transparent)
+                                        .clickable { textAlignment = alignVal }
+                                        .padding(vertical = 10.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = label,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isSelected) PrimaryNeon else TextActive
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Размер шрифта", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextSubtle)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf(
+                                14 to "Мелкий (14)",
+                                18 to "Ср (18)",
+                                24 to "Кр (24)",
+                                32 to "Огромн (32)"
+                            ).forEach { (sizeVal, label) ->
+                                val isSelected = textFontSize == sizeVal
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .border(
+                                            width = 1.dp,
+                                            color = if (isSelected) PrimaryNeon else CustomBorder,
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .background(if (isSelected) PrimaryNeon.copy(alpha = 0.1f) else Color.Transparent)
+                                        .clickable { textFontSize = sizeVal }
+                                        .padding(vertical = 10.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = label,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isSelected) PrimaryNeon else TextActive
+                                    )
+                                }
+                            }
+                        }
                     }
                 },
                 confirmButton = {
@@ -1237,8 +1360,18 @@ fun EditorScreen(
                             val promptText = textToAdd.ifEmpty { "НОВЫЙ ТЕКСТ" }
                             val startFloat = textStartSec.toFloatOrNull() ?: 0f
                             val durationFloat = textDurationSec.toFloatOrNull() ?: 4f
-                            viewModel.addTextOverlay(promptText, startFloat, durationFloat)
+                            viewModel.addTextOverlay(
+                                text = promptText, 
+                                startOffsetSec = startFloat, 
+                                durationSec = durationFloat,
+                                colorHex = textColorHex,
+                                fontSize = textFontSize,
+                                align = textAlignment
+                            )
                             textToAdd = ""
+                            textColorHex = "#FFFFFF"
+                            textFontSize = 18
+                            textAlignment = "Center"
                             showTextSheet = false
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = PrimaryNeon, contentColor = Color.Black)
@@ -1516,6 +1649,37 @@ fun EditorScreen(
                                     Icon(imageVector = Icons.Rounded.VolumeUp, contentDescription = "Active", tint = AccentBlue)
                                 }
                             }
+                        }
+
+                        if (musicTrack != null) {
+                            Spacer(modifier = Modifier.height(18.dp))
+                            Divider(color = CustomBorder, thickness = 0.5.dp)
+                            Spacer(modifier = Modifier.height(14.dp))
+                            
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(imageVector = Icons.Rounded.Tune, contentDescription = null, tint = AccentBlue, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Громкость аудиодорожки", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextActive)
+                                }
+                                Text("${(musicTrack!!.volume * 100).toInt()}%", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = AccentBlue)
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Slider(
+                                value = musicTrack!!.volume,
+                                onValueChange = { viewModel.updateMusicVolume(it) },
+                                valueRange = 0f..1f,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = AccentBlue,
+                                    activeTrackColor = AccentBlue,
+                                    inactiveTrackColor = CustomBorder
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
                 },

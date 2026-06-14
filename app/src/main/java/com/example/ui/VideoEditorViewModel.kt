@@ -295,7 +295,14 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     // Text Overlay Operations
-    fun addTextOverlay(text: String, startOffsetSec: Float, durationSec: Float = 4f) {
+    fun addTextOverlay(
+        text: String, 
+        startOffsetSec: Float, 
+        durationSec: Float = 4f,
+        colorHex: String = "#FFFFFF",
+        fontSize: Int = 18,
+        align: String = "Center"
+    ) {
         val totalMs = totalDurationMs.value
         val startMs = (startOffsetSec * 1000).toLong().coerceIn(0L, totalMs)
         val endMs = (startMs + (durationSec * 1000).toLong()).coerceIn(0L, totalMs)
@@ -304,7 +311,10 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
             id = UUID.randomUUID().toString(),
             text = text,
             startTimeMs = startMs,
-            endTimeMs = endMs
+            endTimeMs = endMs,
+            colorHex = colorHex,
+            fontSize = fontSize,
+            align = align
         )
         _textOverlays.value = _textOverlays.value + overlay
         triggerWorkspaceAutoSave()
@@ -326,6 +336,12 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
                 volume = 0.8f
             )
         }
+        triggerWorkspaceAutoSave()
+    }
+
+    fun updateMusicVolume(volume: Float) {
+        val curr = _musicTrack.value ?: return
+        _musicTrack.value = curr.copy(volume = volume.coerceIn(0f, 1f))
         triggerWorkspaceAutoSave()
     }
 
@@ -395,6 +411,11 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
                     VideoClip(UUID.randomUUID().toString(), "Сосновый Бор", 5000, 0.8f, "Nature", "Warm", colorHex = "#556B2F"),
                     VideoClip(UUID.randomUUID().toString(), "Вершины в тумане", 7000, 1.0f, "Nature", "Vintage", colorHex = "#4682B4")
                 )
+                "cosmic" -> listOf(
+                    VideoClip(UUID.randomUUID().toString(), "Туманность Андромеды", 6000, 1.0f, "Cosmic", "Vaporwave", colorHex = "#7F00FF"),
+                    VideoClip(UUID.randomUUID().toString(), "Гравитационный Маневр", 5000, 1.5f, "Cosmic", "None", colorHex = "#00FFF0"),
+                    VideoClip(UUID.randomUUID().toString(), "Вспышка Квазара", 4000, 1.0f, "Cosmic", "Cyberpunk", colorHex = "#FF007F")
+                )
                 else -> listOf(
                     VideoClip(UUID.randomUUID().toString(), "Мягкий свет лампы", 8000, 1.0f, "Cozy", "None", colorHex = "#D2691E"),
                     VideoClip(UUID.randomUUID().toString(), "Книжная Полка", 7000, 1.0f, "Cozy", "Warm", colorHex = "#CD853F")
@@ -409,6 +430,10 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
                 "nature" -> listOf(
                     TextOverlay(UUID.randomUUID().toString(), "ТИШИНА ГОРОДОВ", 1000, 5000, "#FFFFFF", 20, "Center")
                 )
+                "cosmic" -> listOf(
+                    TextOverlay(UUID.randomUUID().toString(), "ИССЛЕДОВАНИЕ КОСМОСА", 500, 4500, "#00FFF0", 24, "Center"),
+                    TextOverlay(UUID.randomUUID().toString(), "ДОСТИЖЕНИЕ ОРБИТЫ", 5500, 10500, "#FF2D55", 18, "Bottom")
+                )
                 else -> listOf(
                     TextOverlay(UUID.randomUUID().toString(), "Тепло и уют", 1500, 6500, "#FFEBCD", 18, "Bottom")
                 )
@@ -417,6 +442,7 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
             val musicName = when (templateType) {
                 "cyberpunk" -> "Synthwave Speedtrack"
                 "nature" -> "Guitar Forest Trail"
+                "cosmic" -> "Synthwave Speedtrack"
                 else -> "Lofi Coffee Sip"
             }
 
